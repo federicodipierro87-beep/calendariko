@@ -42,7 +42,7 @@ export default function BandModal({
     } else if (band) {
       reset({
         name: band.name,
-        description: band.description || ''
+        description: band.notes || ''
       })
       
       // Load band members
