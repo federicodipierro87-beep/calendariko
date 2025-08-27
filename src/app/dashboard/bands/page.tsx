@@ -201,7 +201,7 @@ export default function BandsPage() {
                         return referente ? (
                           <div className="flex items-center text-sm text-primary-600">
                             <Crown className="h-4 w-4 mr-2" />
-                            Referente: {referente.user.name}
+                            Referente: {referente.user?.name || 'Nome non disponibile'}
                           </div>
                         ) : (
                           <div className="flex items-center text-sm text-gray-400">
