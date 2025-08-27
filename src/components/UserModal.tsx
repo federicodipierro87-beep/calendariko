@@ -52,7 +52,7 @@ export default function UserModal({
         email: user.email,
         password: '',
         isAdmin: user.isAdmin,
-        bandIds: user.bands?.map(b => b.id) || []
+        bandIds: user.bands?.map(b => b.bandId) || []
       })
     }
   }, [user, isCreating, reset])
