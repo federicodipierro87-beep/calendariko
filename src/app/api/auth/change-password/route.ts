@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/middleware'
+import { authenticateRequest } from '@/lib/middleware'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import bcrypt from 'bcryptjs'
@@ -11,7 +11,15 @@ const changePasswordSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
+    const auth = await authenticateRequest(request)
+    if (!auth.authenticated) {
+      return auth.response || NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+    
+    const user = auth.user!
     const body = await request.json()
     const data = changePasswordSchema.parse(body)
 
