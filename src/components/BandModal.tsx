@@ -54,7 +54,7 @@ export default function BandModal({
       
       // Find current referente (MANAGER role)
       const referente = band.users?.find(ub => ub.role === 'MANAGER')
-      setSelectedReferente(referente?.user.id || '')
+      setSelectedReferente(referente?.user?.id || '')
     }
   }, [band, isCreating, reset])
 
