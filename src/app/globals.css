@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* FullCalendar Customization */
+.fc {
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.fc-event {
+  border-radius: 4px;
+  border-width: 1px;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.fc-event-concerto {
+  background-color: #3b82f6;
+  border-color: #2563eb;
+}
+
+.fc-event-indisponibilita {
+  background-color: #6b7280;
+  border-color: #4b5563;
+}
+
+.fc-event-blocco_agenzia {
+  background-color: #8b5cf6;
+  border-color: #7c3aed;
+}
+
+
+.fc-event-opzione {
+  opacity: 0.8;
+  background-color: #f59e0b;
+}
+
+.fc-event-confermato {
+  opacity: 1;
+  background-color: #10b981 !important;
+  border-color: #059669 !important;
+}
+
+.fc-event-annullato {
+  opacity: 0.5;
+  text-decoration: line-through;
+  background-color: #ef4444 !important;
+  border-color: #dc2626 !important;
+}
+
+/* Mobile Responsive Calendar */
+@media (max-width: 768px) {
+  .fc-toolbar {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .fc-toolbar-chunk {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .fc-button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+  }
+}

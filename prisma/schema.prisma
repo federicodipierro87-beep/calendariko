@@ -1,0 +1,202 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  MEMBER
+}
+
+enum EventType {
+  CONCERTO
+  INDISPONIBILITA
+  BLOCCO_AGENZIA
+}
+
+enum EventStatus {
+  TENTATIVO
+  OPZIONE
+  CONFERMATO
+  ANNULLATO
+}
+
+enum EventPrivacy {
+  BAND
+  AGENZIA
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  isAdmin      Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  bands        UserBand[]
+  eventsCreated Event[] @relation("EventCreator")
+  eventsUpdated Event[] @relation("EventUpdater") 
+  attachments  Attachment[]
+  auditLogs    AuditLog[]
+
+  @@map("users")
+}
+
+model Band {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  users  UserBand[]
+  events Event[]
+
+  @@map("bands")
+}
+
+model UserBand {
+  userId String
+  bandId String
+  role   UserRole @default(MEMBER)
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  band Band @relation(fields: [bandId], references: [id], onDelete: Cascade)
+
+  @@id([userId, bandId])
+  @@map("user_bands")
+}
+
+model Event {
+  id        String        @id @default(cuid())
+  bandId    String
+  type      EventType
+  title     String
+  start     DateTime
+  end       DateTime
+  allDay    Boolean       @default(false)
+  status    EventStatus   @default(TENTATIVO)
+  privacy   EventPrivacy  @default(BAND)
+  notes     String?
+  createdBy String
+  updatedBy String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  // Financial fields (optional)
+  cachet    Decimal? @db.Decimal(10, 2)
+  acconto   Decimal? @db.Decimal(10, 2)
+  spese     Decimal? @db.Decimal(10, 2)
+  valuta    String?  @default("EUR")
+
+  // Relations
+  band        Band         @relation(fields: [bandId], references: [id], onDelete: Cascade)
+  creator     User         @relation("EventCreator", fields: [createdBy], references: [id])
+  updater     User?        @relation("EventUpdater", fields: [updatedBy], references: [id])
+  venue       EventVenue?
+  attachments Attachment[]
+  tags        EventTag[]
+
+  @@index([bandId, start])
+  @@index([bandId, end])
+  @@index([start, end])
+  @@map("events")
+}
+
+model Venue {
+  id      String  @id @default(cuid())
+  name    String
+  address String?
+  city    String?
+  country String? @default("IT")
+  lat     Float?
+  lng     Float?
+
+  // Relations
+  events EventVenue[]
+
+  @@map("venues")
+}
+
+model EventVenue {
+  eventId String @unique
+  venueId String
+
+  // Relations
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  venue Venue @relation(fields: [venueId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, venueId])
+  @@map("event_venues")
+}
+
+model Attachment {
+  id         String   @id @default(cuid())
+  eventId    String
+  filename   String
+  mime       String
+  size       Int
+  storageKey String
+  uploadedBy String
+  createdAt  DateTime @default(now())
+
+  // Relations
+  event    Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  uploader User  @relation(fields: [uploadedBy], references: [id])
+
+  @@map("attachments")
+}
+
+model Tag {
+  id    String @id @default(cuid())
+  name  String @unique
+  color String @default("#3b82f6")
+
+  // Relations
+  events EventTag[]
+
+  @@map("tags")
+}
+
+model EventTag {
+  eventId String
+  tagId   String
+
+  // Relations
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, tagId])
+  @@map("event_tags")
+}
+
+model AuditLog {
+  id       String   @id @default(cuid())
+  entity   String   // "Event", "User", "Band"
+  entityId String
+  action   String   // "CREATE", "UPDATE", "DELETE"
+  actorId  String
+  metadata Json?
+  createdAt DateTime @default(now())
+
+  // Relations
+  actor User @relation(fields: [actorId], references: [id])
+
+  @@index([entity, entityId])
+  @@index([actorId])
+  @@map("audit_logs")
+}
