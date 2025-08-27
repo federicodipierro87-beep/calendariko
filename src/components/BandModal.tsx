@@ -107,7 +107,7 @@ export default function BandModal({
       }
 
       // If not creating and referente changed, update it
-      if (!isCreating && band && selectedReferente !== (band.users?.find(ub => ub.role === 'MANAGER')?.user.id || '')) {
+      if (!isCreating && band && selectedReferente !== (band.users?.find(ub => ub.role === 'MANAGER')?.user?.id || '')) {
         await updateReferente(result.data.id)
       }
 
