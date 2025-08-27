@@ -183,9 +183,9 @@ export default function BandsPage() {
                         <h3 className="text-lg font-medium text-gray-900">
                           {band.name}
                         </h3>
-                        {band.description && (
+                        {band.notes && (
                           <p className="text-sm text-gray-500 mt-1">
-                            {band.description}
+                            {band.notes}
                           </p>
                         )}
                       </div>

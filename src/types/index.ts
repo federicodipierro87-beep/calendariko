@@ -11,6 +11,7 @@ export interface User {
 }
 
 export interface Band {
+  _count: any
   id: string
   name: string
   slug: string
