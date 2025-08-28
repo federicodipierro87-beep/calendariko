@@ -21,6 +21,14 @@ export async function authenticateRequest(request: NextRequest): Promise<{
   user?: AuthenticatedRequest['user']
   response?: NextResponse
 }> {
+  // Skip authentication during build time
+  if (process.env.NODE_ENV !== 'production' && !process.env.DATABASE_URL) {
+    return {
+      authenticated: false,
+      response: NextResponse.json({ error: 'Authentication not available during build' }, { status: 503 })
+    }
+  }
+
   const authHeader = request.headers.get('authorization')
   const token = AuthService.extractTokenFromHeader(authHeader || undefined)
 

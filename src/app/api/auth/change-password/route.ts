@@ -1,16 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authenticateRequest } from '@/lib/middleware'
-import { prisma } from '@/lib/prisma'
-import { z } from 'zod'
-import bcrypt from 'bcryptjs'
-
-const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1, 'Password attuale è richiesta'),
-  newPassword: z.string().min(6, 'Nuova password deve essere almeno 6 caratteri'),
-})
 
 export async function POST(request: NextRequest) {
+  // Only enable in production with proper environment
+  if (process.env.NODE_ENV !== 'production' || !process.env.DATABASE_URL) {
+    return NextResponse.json({
+      success: false,
+      message: 'Change password endpoint temporarily disabled during build'
+    }, { status: 503 })
+  }
+
   try {
+    // Dynamic import to avoid build issues
+    const { authenticateRequest } = await import('@/lib/middleware')
+    const { prisma } = await import('@/lib/prisma')
+    const { z } = await import('zod')
+    const bcrypt = await import('bcryptjs')
+
+    const changePasswordSchema = z.object({
+      currentPassword: z.string().min(1, 'Password attuale è richiesta'),
+      newPassword: z.string().min(6, 'Nuova password deve essere almeno 6 caratteri'),
+    })
+
     const auth = await authenticateRequest(request)
     if (!auth.authenticated) {
       return auth.response || NextResponse.json(
@@ -60,13 +70,6 @@ export async function POST(request: NextRequest) {
       message: 'Password changed successfully'
     })
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid input data', details: error.errors },
-        { status: 400 }
-      )
-    }
-
     console.error('Change password error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
